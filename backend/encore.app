@@ -1,0 +1,1 @@
+{"id": "ai-cloth-selector-pywi", "lang": "typescript"}
