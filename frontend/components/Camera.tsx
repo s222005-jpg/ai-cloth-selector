@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Camera as CameraIcon, Upload, Plus } from 'lucide-react';
+import { Camera as CameraIcon, Upload, Plus, Zap, Brain, Sparkles, Image, Scan } from 'lucide-react';
 import backend from '~backend/client';
 
 interface CameraProps {
@@ -43,22 +43,18 @@ export function Camera({ userId, onSuccess }: CameraProps) {
     setIsAnalyzing(true);
 
     try {
-      // Convert file to base64
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
           const base64Data = e.target?.result as string;
           
-          // Upload image
           const { imageUrl } = await backend.clothing.uploadImage({
             imageData: base64Data,
             fileName: selectedFile.name
           });
 
-          // Analyze image
           const { analysis } = await backend.clothing.analyzeImage({ imageUrl });
 
-          // Create clothing item
           await backend.clothing.createItem({
             userId,
             name: clothingName,
@@ -72,9 +68,8 @@ export function Camera({ userId, onSuccess }: CameraProps) {
             imageUrl
           });
 
-          onSuccess('Clothing Added', `${clothingName} has been analyzed and added to your wardrobe!`);
+          onSuccess('Neural Analysis Complete', `${clothingName} has been analyzed and added to your digital wardrobe!`);
           
-          // Reset form
           setSelectedFile(null);
           setPreview(null);
           setClothingName('');
@@ -83,7 +78,7 @@ export function Camera({ userId, onSuccess }: CameraProps) {
           }
         } catch (error) {
           console.error('Error processing clothing:', error);
-          onSuccess('Error', 'Failed to process the clothing item. Please try again.');
+          onSuccess('Analysis Failed', 'Failed to process the clothing item. Please try again.');
         } finally {
           setIsAnalyzing(false);
         }
@@ -97,95 +92,147 @@ export function Camera({ userId, onSuccess }: CameraProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CameraIcon className="h-5 w-5" aria-hidden="true" />
-          Add New Clothing Item
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <Label htmlFor="clothing-name">Clothing Name</Label>
-          <Input
-            id="clothing-name"
-            placeholder="e.g., Blue Cotton T-Shirt"
-            value={clothingName}
-            onChange={(e) => setClothingName(e.target.value)}
-            aria-describedby="name-help"
-          />
-          <p id="name-help" className="text-sm text-muted-foreground">
-            Give your clothing item a descriptive name
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          <Label htmlFor="photo-input">Take Photo or Upload Image</Label>
-          <input
-            id="photo-input"
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileSelect}
-            className="hidden"
-            aria-describedby="photo-help"
-          />
-          
-          {preview ? (
-            <div className="space-y-4">
-              <img 
-                src={preview} 
-                alt="Preview of selected clothing item"
-                className="w-full max-w-md mx-auto rounded-lg border"
-              />
-              <div className="flex gap-2 justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={handleCapture}
-                  aria-label="Take new photo"
-                >
-                  <CameraIcon className="h-4 w-4 mr-2" aria-hidden="true" />
-                  Retake
-                </Button>
-                <Button 
-                  onClick={handleAnalyzeAndSave}
-                  disabled={isAnalyzing || !clothingName.trim()}
-                  aria-label={isAnalyzing ? 'Analyzing clothing item' : 'Analyze and save clothing item'}
-                >
-                  {isAnalyzing ? (
-                    'Analyzing...'
-                  ) : (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
-                      Add to Wardrobe
-                    </>
-                  )}
-                </Button>
-              </div>
+    <div className="relative">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 blur-3xl rounded-3xl"></div>
+      
+      <Card className="relative backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+        <CardHeader className="relative">
+          <div className="absolute top-4 right-4">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-medium">
+              <Brain className="h-3 w-3" />
+              AI POWERED
             </div>
-          ) : (
-            <Button 
-              onClick={handleCapture} 
-              className="w-full py-8"
-              variant="outline"
-              aria-label="Take photo of clothing item"
-            >
-              <div className="flex flex-col items-center gap-2">
-                <CameraIcon className="h-8 w-8" aria-hidden="true" />
-                <span>Take Photo</span>
-                <span className="text-sm text-muted-foreground">
-                  or tap to select from gallery
-                </span>
-              </div>
-            </Button>
-          )}
+          </div>
           
-          <p id="photo-help" className="text-sm text-muted-foreground">
-            Take a clear photo of the clothing item against a plain background for best analysis results
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500">
+              <Scan className="h-6 w-6 text-white" />
+            </div>
+            Neural Clothing Analyzer
+          </CardTitle>
+          <p className="text-slate-400 mt-2">
+            Advanced AI vision technology for intelligent wardrobe analysis
           </p>
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <Label htmlFor="clothing-name" className="text-slate-200 font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              Clothing Item Name
+            </Label>
+            <Input
+              id="clothing-name"
+              type="text"
+              placeholder="e.g., Blue Cotton T-Shirt"
+              value={clothingName}
+              onChange={(e) => setClothingName(e.target.value)}
+              className="bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-cyan-400 focus:ring-cyan-400/50 rounded-xl"
+              aria-describedby="clothing-name-help"
+            />
+            <p id="clothing-name-help" className="text-xs text-slate-400">
+              Give your clothing item a descriptive name for easy identification
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <Label className="text-slate-200 font-medium flex items-center gap-2">
+              <Image className="h-4 w-4 text-purple-400" />
+              Image Capture
+            </Label>
+            
+            {preview ? (
+              <div className="relative group">
+                <div className="relative rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl">
+                  <img
+                    src={preview}
+                    alt="Clothing preview"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs">
+                      Ready for analysis
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={handleCapture}
+                  className="mt-4 w-full bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-xl"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Choose Different Image
+                </Button>
+              </div>
+            ) : (
+              <div 
+                onClick={handleCapture}
+                className="group relative border-2 border-dashed border-white/30 rounded-xl p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-white/5 transition-all duration-300"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && handleCapture()}
+                aria-label="Upload clothing image"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-cyan-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <div className="relative space-y-4">
+                  <div className="mx-auto p-4 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 w-fit group-hover:scale-110 transition-transform duration-300">
+                    <CameraIcon className="h-8 w-8 text-cyan-400" />
+                  </div>
+                  <div>
+                    <p className="text-slate-200 font-medium mb-2">
+                      Capture or Upload Clothing Image
+                    </p>
+                    <p className="text-sm text-slate-400">
+                      AI will analyze material, style, and weather suitability
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+                    <Zap className="h-3 w-3" />
+                    Instant AI Analysis
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              aria-label="Select clothing image file"
+            />
+          </div>
+
+          <Button
+            onClick={handleAnalyzeAndSave}
+            disabled={!selectedFile || !clothingName.trim() || isAnalyzing}
+            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-4 rounded-xl shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+            aria-describedby="analyze-button-help"
+          >
+            {isAnalyzing ? (
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Neural Processing...</span>
+                <Brain className="h-4 w-4 animate-pulse" />
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Analyze & Add to Wardrobe
+                <Plus className="h-4 w-4" />
+              </div>
+            )}
+          </Button>
+          
+          <p id="analyze-button-help" className="text-xs text-slate-400 text-center">
+            AI will analyze fabric type, warmth level, and weather resistance
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
